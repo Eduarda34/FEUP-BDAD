@@ -1,0 +1,22 @@
+DROP TABLE IF EXISTS Pessoa;
+
+CREATE TABLE Pessoa(
+    idPessoa INTEGER PRIMARY KEY,
+    nome TEXT             CONSTRAINT nome_nn NOT NULL,
+    dataNascimento DATE   CONSTRAINT dataNascimento_nn NOT NULL,
+    morada TEXT           CONSTRAINT morada_nn NOT NULL,
+    mail TEXT             CONSTRAINT mail_nn NOT NULL,
+    telefone CHAR(9)      CONSTRAINT telefone_nn NOT NULL 
+                          CONSTRAINT telefone_positive CHECK (telefone > 0)
+);
+
+--Table Encomenda
+DROP TABLE IF EXISTS Encomenda;
+
+CREATE TABLE Encomenda(
+    idEncomenda INTEGER PRIMARY KEY,
+    dataPedido DATE    CONSTRAINT dataPedido_nn NOT NULL,
+    volume INTEGER     CONSTRAINT volume_positive CHECK (volume > 0),
+    peso INTEGER       CONSTRAINT peso_positive CHECK (peso > 0),
+    
+    

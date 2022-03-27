@@ -1,0 +1,69 @@
+--Qual a média do número de encomendas por cliente?
+SELECT ROUND(AVG(p.enc),2) as media_encomendas_por_cliente FROM
+    (SELECT Pessoa.nome, COUNT(*) AS enc FROM Pessoa, Encomenda
+    WHERE Pessoa.idPessoa = Encomenda.idCliente
+    GROUP BY Pessoa.idPessoa) p
+;
+
+--Qual o cliente que mais gastou em encomendas?
+
+
+--Qual o tipo de trabalhador com a menor média salarial?
+SELECT IIF(min(op.salarioOperadorPosto, c.salarioCondutor) = op.salarioOperadorPosto,'Operador Posto','Condutor') as tipo_trabalhador, ROUND(min(op.salarioOperadorPosto, c.salarioCondutor),2) as menor_media FROM(
+    (SELECT avg(salario) AS salarioOperadorPosto FROM Funcionario, OperadorPosto
+    WHERE Funcionario.idFuncionario = OperadorPosto.idOperadorPosto) op,
+    (SELECT avg(salario) AS salarioCondutor FROM Funcionario, Condutor
+    WHERE Funcionario.idFuncionario = Condutor.idCondutor) c
+);
+
+--FALTA UMA PERGUNTA
+
+
+--Número máximo de viagens por dia
+SELECT MAX(p.ViagemPorDia), p.data FROM
+    (SELECT Horario.data, COUNT(*) AS ViagemPorDia FROM Viagem, Horario
+    WHERE Viagem.idHorario == Horario.idHorario
+    GROUP BY Horario.data) p
+;
+
+--Quais os nomes dos clientes que pediram encomendas para o posto de entrega com código-postal 4445-273?
+SELECT Encomenda.idEncomenda,Pessoa.nome FROM Pessoa,Encomenda,PostoEntrega
+WHERE PostoEntrega.codigoPostal = '7340-002' AND Encomenda.idPostoEntrega = PostoEntrega.idPostoEntrega AND Encomenda.idCliente = Pessoa.idPessoa;
+
+--Qual o tempo médio que demora a entregar?
+SELECT AVG(p.diferenca_em_dias) as media_diferenca_em_dias FROM
+    (SELECT (julianday(Horario.data) - julianday(Encomenda.dataPedido)) AS diferenca_em_dias FROM Horario, Viagem, Encomenda
+    WHERE Viagem.idHorario = Horario.idHorario AND Encomenda.idViagem = Viagem.idViagem) p
+;
+
+--Qual o posto com mais operadores num mesmo dia? 
+Select q.idPostoEntrega, q.data,max(q.num_funcionarios) as max_funcionarios from(
+Select PostoEntrega.idPostoEntrega, Horario.data,count(OperadorPosto.idOperadorPosto) as num_funcionarios from PostoEntrega,Horario,OperadorPosto,HorarioOperadorPosto
+Where OperadorPosto.idOperadorPosto = HorarioOperadorPosto.idOperador AND Horario.idHorario = HorarioOperadorPosto.idHorario AND OperadorPosto.idPostoEntrega = PostoEntrega.idPostoEntrega
+Group by PostoEntrega.idPostoEntrega,Horario.data) q;
+
+--Quais as viagens iniciadas entres as 12horas do dia 06/12/2021 e as 12horas do dia 08/12/2021?
+SELECT Viagem.idViagem, Horario.data, Horario.horaInicio
+FROM Viagem
+LEFT JOIN Horario
+ON Viagem.idHorario = Horario.idHorario
+WHERE Horario.data BETWEEN '2021-12-06' AND '2021-12-07'
+ORDER BY Horario.data, Horario.horaInicio;
+
+--Qual o condutor, a hora e a matricula do carro da viagem com mais paragens? 
+SELECT Viagem.idViagem, V.numPostos, Pessoa.nome, Carro.matricula, Horario.data, Horario.horaInicio
+FROM Pessoa, Carro, Horario, Viagem,
+    (SELECT Viagem.idViagem, p.numPostos 
+    FROM Viagem, 
+    (SELECT PostoPertenceRota.idRota, COUNT(*) AS numPostos 
+        FROM PostoPertenceRota
+        GROUP BY PostoPertenceRota.idRota
+        HAVING numPostos = (
+            SELECT COUNT(*) AS max FROM PostoPertenceRota
+            GROUP BY PostoPertenceRota.idRota
+            ORDER BY COUNT(*) DESC
+            LIMIT 1)
+        )p   
+    WHERE Viagem.idRota = p.idRota) V
+WHERE V.idViagem = Viagem.idViagem AND Viagem.idCondutor = Pessoa.idPessoa AND Viagem.idCarro = Carro.idCarro AND Viagem.idHorario = Horario.idHorario
+;

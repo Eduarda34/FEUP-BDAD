@@ -1,0 +1,42 @@
+(1).
+
+--> autor A;
+--> instituição I;
+--> correio eletrónico C;
+--> título T;
+--> revista R;
+--> sigla S;
+--> número internacional S#;
+--> editada por E;
+--> volume V;
+--> número N;
+--> ano Y + mês M;
+--> inicia-se a páginas PI;
+--> termina a páginas PF.
+
+a)
+  {S#,V,N,A} = {S#,V,N,A,S,Y,M,I,C,R,E} 
+      |
+   Não pode ser uma chave para REFS por ser impossível descobrir PI e PF
+
+b) REFS(T,A,I,C,S,S#,R,S,E,V,N,PI,PF,Y,M)
+
+S -> S#
+S -> R
+S -> E
+S# -> S
+S,V,N -> Y
+S,V,N -> M
+S,V,N,PI -> T
+S,V,N,PI -> PF
+A -> I
+A -> C
+
+S#R1 (S,S#)
+R2 (S,S#,R,E) -> revista
+R4 (S,V,N,Y,M) -> número revista
+R6 (S,V,N,PI,T,PF) -> artigo
+R8 (A,I,C) -> autor
+R10 (S,V,N,A,PI) -> autores artigo
+
+c)
